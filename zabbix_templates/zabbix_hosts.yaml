@@ -1,0 +1,12 @@
+zabbix_export:
+  version: '7.4'
+  host_groups:
+    - uuid: 010972d2840847e5bd767a4420947500
+      name: ZbxEdx
+  hosts:
+    - host: zbxedx-test
+      name: zbxedx-test
+      templates:
+        - name: 'ZbxEdx Test Template'
+      groups:
+        - name: ZbxEdx

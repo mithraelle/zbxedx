@@ -1,0 +1,28 @@
+zabbix_export:
+  version: '7.4'
+  template_groups:
+    - uuid: 7df96b18c230490a9a0a9e2307226338
+      name: Templates
+  templates:
+    - uuid: 8aa2a5bcc7d14a63a11f5b730d01795a
+      template: 'ZbxEdx Test Template'
+      name: 'ZbxEdx Test Template'
+      groups:
+        - name: Templates
+      items:
+        - uuid: 9324358a5ab146baacffb552e402acaf
+          name: 'Dice faces'
+          type: ZABBIX_ACTIVE
+          key: dice.faces
+        - uuid: 55f91e46a6fa408d90dd513f8d9a1ed8
+          name: 'Dice throws'
+          type: ZABBIX_ACTIVE
+          key: dice.throws
+        - uuid: d32cef47d578487bafe18bd09d2a12b2
+          name: 'Dice A'
+          type: ZABBIX_ACTIVE
+          key: 'dice[A]'
+        - uuid: 36b4ec2741c341fc8e01ded1faba7e67
+          name: 'Dice B'
+          type: ZABBIX_ACTIVE
+          key: 'dice[B]'
