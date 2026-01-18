@@ -13,7 +13,7 @@ import (
 
 var registry = make(map[string]*Plugin)
 
-func Register(name string, metricSets []MetricSet, options ...Option) error {
+func Register(name string, metricSets []*MetricSet, options ...Option) error {
 	var err error
 	var metricSetSource *MetricSetSource
 
@@ -34,7 +34,7 @@ func Register(name string, metricSets []MetricSet, options ...Option) error {
 	manager := watch.NewManager(p)
 	p.SetManager(manager)
 
-	metrics := make([]string, 0, len(metricSets)*2)
+	metrics := make([]string, 0)
 
 	usedKeys := make(map[string]bool)
 

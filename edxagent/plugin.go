@@ -11,6 +11,7 @@ import (
 
 	"golang.zabbix.com/agent2/pkg/itemutil"
 	"golang.zabbix.com/agent2/pkg/watch"
+	"golang.zabbix.com/sdk/log"
 	"golang.zabbix.com/sdk/plugin"
 )
 
@@ -37,6 +38,10 @@ type Plugin struct {
 	exportByKey     map[string]ExportFn
 	metricSetSource []*MetricSetSource
 	eventSources    map[string]*MetricSetSource
+}
+
+type Logger interface {
+	log.Logger
 }
 
 func (p *Plugin) AddMetricSource(metricSetSource *MetricSetSource) {
@@ -167,4 +172,12 @@ func (p *Plugin) Validate(options interface{}) error {
 		return p.ValidateFunc(options)
 	}
 	return nil
+}
+
+func (p *Plugin) Logger(name string) Logger {
+	loggerName := p.name
+	if name != "" {
+		loggerName += "." + name
+	}
+	return log.New(loggerName)
 }

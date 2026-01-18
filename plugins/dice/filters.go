@@ -26,7 +26,7 @@ func NewThrowsFilter(_ []string) (edxagent.WatchFilter, error) {
 }
 
 func (d *throwsFilter) Process(v interface{}) (value *string, err error) {
-	s := fmt.Sprintf("%d", Throws)
+	s := fmt.Sprintf("%d", dice.Throws)
 	return &s, nil
 }
 

@@ -24,26 +24,26 @@ import (
 // It must be unique within the agent process.
 const pluginName = "DicePlugin"
 
-// Sample plugin config structure relates to conf/plugin_dice.conf
+// PluginOptions defines configuration parameters for the Dice plugin.
+// Relates to conf/plugin_dice.conf
 type PluginOptions struct {
 	// Defines the force-push interval (in seconds) for plugin-collected metrics.
-	// These metrics are collected asynchronously and flushed independently from the agent's default reporting cycle.
+	// These metrics are collected asynchronously and flushed independently of the agent's default reporting cycle.
 	// Configured via Plugins.DicePlugin.Interval.
-	Interval int `conf:"default=5"`
+	Interval int `conf:"default=10"`
 
 	// Sets the number of dice faces.
 	// Configured via Plugins.DicePlugin.Faces.
 	Faces int `conf:"default=6"`
 
-	// Defines the list of available dice identifiers.
-	// Configured via Plugins.DicePlugin.Dice.
-	Dice []string
+	// Defines the interval (in seconds) between dice throws.
+	ThrowInterval int `conf:"default=5"`
 }
 
-// Sample plugin registration
+// init registers the Dice plugin and its metric sets in the Zabbix Agent2.
 func init() {
 	err := edxagent.Register(pluginName,
-		[]edxagent.MetricSet{DiceMetrics},         //List of plugin metric sets
+		[]*edxagent.MetricSet{&DiceMetrics},       //List of plugin metric sets
 		edxagent.WithValidateFunction(Validate),   // Optional configuration validation
 		edxagent.WithConfigureFunction(Configure), // Optional configuration file parser
 	)
@@ -54,7 +54,7 @@ func init() {
 	}
 }
 
-// Validate validates plugin configuration options.
+// Validate performs basic sanity checks for plugin configuration options.
 func Validate(options interface{}) error {
 	var opts PluginOptions
 
@@ -63,15 +63,24 @@ func Validate(options interface{}) error {
 		return edxerr.New("cannot unmarshal configuration options: " + err.Error())
 	}
 
-	//Simple check and error reporting
-	if len(opts.Dice) == 0 {
-		return edxerr.New("no dice specified in configuration")
+	//Sample parameter validation
+	if opts.Faces < 2 {
+		return edxerr.New("number of dice faces must be at least 2")
+	}
+
+	if opts.ThrowInterval < 1 {
+		return edxerr.New("throw interval must be at least 1 second")
+	}
+
+	if opts.Interval < 1 {
+		return edxerr.New("force-push interval must be at least 1 second")
 	}
 
 	return nil
 }
 
-// Configure parses plugin-specific configuration from the Zabbix agent config file.
+// Configure parses plugin-specific configuration from the Zabbix agent config file,
+// applies validated configuration values and initializes runtime state for the Dice metric set.
 func Configure(p *edxagent.Plugin, global *edxagent.GlobalOptions, options interface{}) {
 	config := PluginOptions{}
 
@@ -80,13 +89,17 @@ func Configure(p *edxagent.Plugin, global *edxagent.GlobalOptions, options inter
 		p.Errf("cannot unmarshal configuration options: %s", err)
 	}
 	p.Infof(
-		"Dice plugin configuration: faces=%d, interval=%d, dices=%s",
+		"Dice plugin configuration: faces=%d, throw interval=%d, force-push interval=%d",
 		config.Faces,
+		config.ThrowInterval,
 		config.Interval,
-		config.Dice,
 	)
 
-	Dices = config.Dice
-	Faces = config.Faces
+	// Pass configuration to the dice metric state
+	err := dice.ConfigureDice(&config, p.Logger("dice"))
+	if err != nil {
+		p.Errf("Can't configure dice plugin: %s", err)
+		return
+	}
 	p.SetFlushInterval(config.Interval)
 }
