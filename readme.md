@@ -148,6 +148,15 @@ This mirrors how Zabbix handles item lifecycle and avoids shared mutable state.
 
 The `bootstrap.sh` script downloads and prepares the Zabbix source tree used for local builds and integration testing.
 
+```bash
+./bootstrap.sh                  # latest 7.4.x release
+./bootstrap.sh 7.4.16           # exact tag (pre-releases such as 7.4.17rc1 work too)
+./bootstrap.sh release/7.4      # tip of the release branch, may contain unreleased changes
+./bootstrap.sh --force 7.4      # replace an existing zabbix/ directory
+```
+
+Bootstrapping runs `go mod tidy`, so `go.mod` and `go.sum` follow the selected Zabbix version.
+
 ## Quick start (Docker)
 
 The easiest way to verify that the framework compiles inside Zabbix Agent2 and that
@@ -162,6 +171,16 @@ docker run --rm zbxedx-agent
 
 The container uses example configuration files from conf/ and loads the dice
 example plugin.
+
+The image builds against the local `zabbix/` source tree. If it is missing (`bootstrap.sh` was not run),
+the build bootstraps Zabbix itself. To ignore the local tree and bootstrap a fresh one:
+
+```bash
+docker build --build-arg FORCE_BOOTSTRAP=1 -t zbxedx-agent .
+docker build --build-arg FORCE_BOOTSTRAP=1 --build-arg ZBX_VERSION=7.4.16 -t zbxedx-agent .
+```
+
+`ZBX_VERSION` is passed to `bootstrap.sh` and only takes effect when bootstrapping happens.
 
 Note: the Docker image is intended for local testing and development. It is not a
 production deployment recipe.
