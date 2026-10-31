@@ -8,8 +8,8 @@ package edxagent
 import (
 	"errors"
 
-	"golang.zabbix.com/agent2/pkg/itemutil"
 	"golang.zabbix.com/agent2/pkg/watch"
+	"golang.zabbix.com/sdk/plugin/itemutil"
 )
 
 type Publisher interface {
